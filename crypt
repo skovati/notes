@@ -1,0 +1,18 @@
+#!/bin/sh
+
+case "$1" in
+    -e)
+        tar zcvf wiki.tar.gz wiki
+        gpg -sear D82CB814F5C6956ABD2DBD405026E406B7B3818F wiki.tar.gz
+        shred -u wiki.tar.gz
+    ;;
+    -d)
+        gpg wiki.tar.gz.asc
+        tar zxvf wiki.tar.gz
+        shred -u wiki.tar.gz
+        shred -u wiki.tar.gz.gpg
+    ;;
+    *)
+        echo "usage: crypt [option]\n\t-e encrypt wiki\n\t-d decrypt wiki"
+    ;;
+esac
