@@ -1,0 +1,52 @@
+#!/bin/sh
+
+WIKIDIR=$HOME/dev/git/wiki
+
+encrypt_wiki() {
+    tar cf $WIKIDIR/wiki.tar -C $WIKIDIR wiki || {
+        echo "unable to package wiki..."
+        exit 1
+    }
+    gpg -q -o $WIKIDIR/wiki.tar.gpg -sear D82CB814F5C6956ABD2DBD405026E406B7B3818F $WIKIDIR/wiki.tar || {
+        echo "unable to encrypt wiki... try manually"
+        exit 1
+    }
+    shred -u $WIKIDIR/wiki.tar
+    rm -rf $WIKIDIR/wiki
+}
+
+decrypt_wiki() {
+    gpg -q -o $WIKIDIR/wiki.tar --decrypt $WIKIDIR/wiki.tar.gpg || {
+        echo "unable to decrypt and/or verify the signature... try manually"
+        exit 1
+    }
+    tar xf $WIKIDIR/wiki.tar -C $WIKIDIR && \
+    shred -u $WIKIDIR/wiki.tar*
+}
+
+case "$1" in
+    edit | "")
+        [ -d $WIKIDIR/wiki ] || {
+            decrypt_wiki
+        }
+        $EDITOR $WIKIDIR/wiki/index.md
+        encrypt_wiki
+    ;;
+    push)
+        [ -d $WIKIDIR/wiki ] && {
+        encrypt_wiki
+        }
+        cd $WIKIDIR
+        git commit -S -am "update wiki" && git push origin main
+        cd -
+    ;;
+    encrypt)
+        encrypt_wiki
+    ;;
+    decrypt)
+        decrypt_wiki
+    ;;
+    *)
+        echo "usage: crypt [option]\n\t-e encrypt wiki\n\t-d decrypt wiki"
+    ;;
+esac
