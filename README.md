@@ -5,10 +5,12 @@ Note: this wiki setup uses my simple [wiki script](https://github.com/skovati/sc
 
 ## usage
 
+Add the wiki script to your `$PATH`, and edit the `$WIKIDIR` variable to where you store your wiki
+
 `wiki [command]`
 
-decrypts and opens vimwiki in $EDITOR
+decrypts, opens vimwiki in $EDITOR, and encrypts on exit
 `wiki edit`
 
-encrypts with gpg public key and commits and pushes to remote git repo
+encrypts with gpg public key, commits, pushes to remote git repo
 `wiki push`
