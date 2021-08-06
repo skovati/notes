@@ -1,0 +1,132 @@
+#!/bin/sh
+
+REPO=$HOME/dev/git/notes
+GPG_KEY=D82CB814F5C6956ABD2DBD405026E406B7B3818F
+NOTESDIR=/tmp/notes
+
+USAGE="usage: encrypt [option] (default 
+    \tedit \t- decrypt, edit, and encrypt notes
+    \tpush \t- encrypts and pushes to remote gitAA
+    \tzet \t- create new zettlekasten
+    \tdiary new \t- create new zettlekasten
+    \tencrypt \t- just encrypt notes
+    \tdecrypt \t- just decrypt notes"
+
+encrypt() {
+    tar cf /tmp/notes.tar -C /tmp notes || {
+        printf "%s\n" "unable to package notes..."
+        exit 1
+    }
+    gpg -q -o $REPO/notes.tar.gpg -sear $GPG_KEY /tmp/notes.tar || {
+        printf "%s\n" "unable to encrypt notes... try manually"
+        exit 1
+    }
+    shred -u /tmp/notes.tar
+    rm -rf /tmp/notes
+}
+
+decrypt() {
+    if [ ! -d /tmp/notes ]; then
+        gpg -q -o /tmp/notes.tar --decrypt $REPO/notes.tar.gpg || {
+            printf "%s\n" "unable to decrypt and/or verify the signature... try manually"
+            exit 1
+        }
+        tar xf /tmp/notes.tar -C /tmp && \
+        shred -u /tmp/notes.tar
+        shred -u $REPO/notes.tar.gpg
+    fi
+}
+
+diary() {
+    decrypt
+    case "$1" in
+        "read" | "")
+            $EDITOR /tmp/notes/diary/diary.md
+            ;;
+        "new" )
+            DATE=$(date --iso-8601=date)
+            printf "%s\n" $(date --iso-8601=minutes) >> /tmp/notes/diary/$DATE.md
+            $EDITOR /tmp/notes/diary/$DATE.md
+            ;;
+        *)
+            printf "%s\n" "error, check usage"
+            $EDITOR /tmp/notes/diary/diary.md
+            ;;
+    esac
+    encrypt
+}
+
+zet() {
+    decrypt
+    case "$1" in
+        "read" | "")
+            $EDITOR /tmp/notes/zet/index.md
+            ;;
+        "new" )
+            if [ ! -z $2 ]; then
+                SUBJECT=$2
+            else
+                printf "%s\n" "existing subjects:"
+                ls /tmp/notes/zet/
+                printf "%s" "subject: "
+                read SUBJECT
+                mkdir /tmp/notes/zet/$SUBJECT &> /dev/null
+                COUNT=$(ls /tmp/notes/zet/$SUBJECT | wc -l)
+                printf "%s\n" $(date --iso-8601=seconds) > /tmp/notes/zet/$SUBJECT/$COUNT.md
+                $EDITOR /tmp/notes/zet/$SUBJECT/$COUNT.md
+            fi
+            ;;
+        *)
+            printf "%s\n" "error, check usage"
+            $EDITOR /tmp/notes/zet/index.md
+            ;;
+    esac
+    encrypt
+}
+
+case "$1" in
+    "")
+        decrypt
+        $EDITOR /tmp/notes/index.md
+        encrypt
+    ;;
+    wiki)
+        decrypt
+        $EDITOR /tmp/notes/wiki/index.md
+        encrypt
+    ;;
+    diary)
+        diary $2
+    ;;
+    zet)
+        zet $2 $3
+    ;;
+    push)
+        [ -d /tmp/notes ] && {
+            printf "%s\n" "encrypting notes..."
+            encrypt
+        }
+        pushd $REPO
+        git commit -S -am "update notes" && git push origin main
+        popd
+    ;;
+    encrypt)
+        [ -d $NOTESDIR ] && {
+            encrypt
+            printf "%s%s\n" "encrypted notes located at " $REPO
+            exit 0
+        }
+        printf "%s\n" "notes already encrypted at $REPO"
+    ;;
+    decrypt)
+        [ -d $NOTESDIR ] || {
+            decrypt
+            printf "%s%s\n" "decrypted notes located at " $NOTESDIR
+            exit 0
+        }
+        printf "%s%s\n" "notes already decrypted at " $NOTESDIR
+    ;;
+    *)
+        printf "%s\n" $USAGE
+    ;;
+esac

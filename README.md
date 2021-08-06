@@ -1,16 +1,25 @@
-# wiki
-Encrypted wiki/dairy/notes powered by vimwiki, markdown, and gpg
+# notes
+Encrypted wiki/dairy/zettlekasten powered by vimwiki, markdown, gpg, and a shell script
 
-Note: this wiki setup uses my simple [wiki script](https://github.com/skovati/scripts/blob/master/wiki) in order to manage encryption, editing, and git anywhere on my system.
+This setup uses my simple notes script in order to manage encryption, editing, and git anywhere on my system.
 
 ## usage
 
-Add the wiki script to your `$PATH`, and edit the `$WIKIDIR` variable to where you store your wiki
+Add the notes script to your `$PATH`, and edit the `$WIKIDIR` variable to where you store your wiki
 
-`wiki [command]`
+`notes [command]`
 
-decrypts, opens vimwiki in $EDITOR, and encrypts on exit
-`wiki edit`
+decrypt, open notes in $EDITOR, and encrypt on exit
+`notes`
 
-encrypts with gpg public key, commits, pushes to remote git repo
-`wiki push`
+encrypt with gpg public key, commit, push to git remote
+`notes push`
+
+create new zettlekasten 
+`notes zet new`
+
+create new diary entry
+`notes diary new`
+
+view wiki
+`notes wiki`
