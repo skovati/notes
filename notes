@@ -4,7 +4,7 @@ REPO=$HOME/dev/git/notes
 GPG_KEY=D82CB814F5C6956ABD2DBD405026E406B7B3818F
 NOTESDIR=/tmp/notes
 
-USAGE="usage: encrypt [option] (default 
+USAGE="usage: encrypt [option] (default edit)
     \tedit \t- decrypt, edit, and encrypt notes
     \tpush \t- encrypts and pushes to remote gitAA
     \tzet \t- create new zettlekasten
