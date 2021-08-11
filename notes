@@ -45,7 +45,7 @@ diary() {
             ;;
         "new" )
             DATE=$(date --iso-8601=date)
-            printf "%s\n" $(date --iso-8601=minutes) >> /tmp/notes/diary/$DATE.md
+            printf "%s\n%s, %s %s, %s\n" $(date --iso-8601=minutes) $(date +"%A %B %d %Y") >> /tmp/notes/diary/$DATE.md
             $EDITOR /tmp/notes/diary/$DATE.md
             ;;
         *)
