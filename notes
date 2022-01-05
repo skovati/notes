@@ -106,9 +106,10 @@ case "$1" in
             printf "%s\n" "encrypting notes..."
             encrypt
         }
-        pushd $REPO
-        git commit -S -am "update notes" && git push origin main
-        popd
+        (
+            cd $REPO
+            git commit -S -am "update notes" && git push origin main
+        )
     ;;
     encrypt)
         [ -d $NOTESDIR ] && {
